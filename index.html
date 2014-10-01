@@ -15,7 +15,7 @@
 				Hello world
 			</div>
 		</div>
-		<textarea class="chat_area" placeholder = "your message goes in here"></textarea>
+		<textarea class="chat_area" placeholder = "Type the message here"></textarea>
 		<div class="chat-status">Status: <span>Idle</span></div>
 	</div>
 	
@@ -28,6 +28,7 @@
 			};
 			var textarea = getNode('.chat textarea');
 			var chatName = getNode('.chat-name');
+			var messages = getNode('.chat-messages');
 			var status = getNode('.chat-status');
 
 			var statusDefault = status.textContent;
@@ -56,12 +57,32 @@
 			if (socket != undefined) {
 				//console.log("connected to server successfully");
 
+				//listen for output
+				socket.on('output', function(data){
+					//console.log(data);
+
+					if(data.length){
+						for (var x = 0; x<data.length;x+=1){
+							//create a div in chat-messages to display the message
+							var message = document.createElement('div');
+							message.setAttribute('class', 'chat-message');
+							message.textContent = data[x].name + ': ' + data[x].message;
+
+							//append the message 
+							messages.appendChild(message);
+							//inser the appended message before the messages
+							messages.insertBefore(message, messages.firstChild);
+						}
+					}
+
+				});
+
 				//listen for a status from server
 				socket.on('status', function(data){
 					//check the type of data sent from server side
 					setStatus((typeof data == 'object') ? data.message: data);
 					if (data.clear) {
-						//clear the textarea
+						//clear the input textarea
 						textarea.value = '';
 					}
 				});
