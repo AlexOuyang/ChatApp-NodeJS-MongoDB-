@@ -20,6 +20,68 @@
 	</div>
 	
 	<script src = "http://127.0.0.1:8080/socket.io/socket.io.js"></script>
+
+	<script>
+		(function(){
+			var getNode = function(s) {
+				return document.querySelector(s);
+			};
+			var textarea = getNode('.chat textarea');
+			var chatName = getNode('.chat-name');
+			var status = getNode('.chat-status');
+
+			var statusDefault = status.textContent;
+			//change the status to the given parameter s
+			var setStatus = function(s){
+				status.textContent = s;
+				if (s!=statusDefault){
+					//set status back to default after 3 seconds
+					var delay = setTimeout(function(){
+						setStatus(statusDefault);
+						//prevents the setTimeInterval from repeating
+						clearInterval(delay);
+					}, 3000);
+				}
+			};
+			setStatus('testing');
+
+			try {
+				var socket = io.connect('http://127.0.0.1:8080');
+
+			} catch(e) {
+				//client fails to conenct to server
+
+			}
+
+			if (socket != undefined) {
+				//console.log("connected to server successfully");
+
+				//listen for a status from server
+				socket.on('status', function(data){
+					//check the type of data sent from server side
+					setStatus((typeof data == 'object') ? data.message: data);
+					if (data.clear) {
+						//clear the textarea
+						textarea.value = '';
+					}
+				});
+
+				//listen for keydown
+				textarea.addEventListener('keydown', function(event){
+					var self = this; //self refers to the textarea itself
+					var name = chatName.value;
+					//console.log(event.which);
+					if(event.which == 13 && event.shiftKey ==false) {
+						//console.log("data sent");
+						//self.value contains the text inside the text area
+						socket.emit('input', {name:name, message:self.value});
+						event.preventDefault();
+					}
+				})
+			}
+		})();
+
+	</script>
 </body>
 </html>
 
