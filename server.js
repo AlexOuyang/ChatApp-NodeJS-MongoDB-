@@ -14,9 +14,9 @@ mongo.connect('mongodb://127.0.0.1/chat', function(err,db){
 		};
 
 		//emit all messages in textarea
-		//limit the amount of messages we want to sow in textarea, 
+		//new users are limited to 50 messages when log on
 		//sort({_id:1}) sorts the data in descending order by id
-		col.find().limit(100).sort({_id: 1}).toArray(function(err, res){
+		col.find().limit(50).sort({_id: 1}).toArray(function(err, res){
 			if(err) throw err;
 			socket.emit('output', res);
 		});
